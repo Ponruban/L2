@@ -1,0 +1,38 @@
+# Development Dockerfile for Spring Boot application
+FROM maven:3.9.6-eclipse-temurin-17
+
+# Install curl for health checks
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy Maven configuration files
+COPY pom.xml .
+
+# Download dependencies (this layer will be cached if pom.xml doesn't change)
+RUN mvn dependency:go-offline -B -Dmaven.test.skip=true
+
+# Copy source code
+COPY src ./src
+
+# Create necessary directories
+RUN mkdir -p /app/uploads /app/logs /app/temp
+
+# Expose ports
+EXPOSE 8080 5005
+
+# Set JVM options for development
+ENV JAVA_OPTS="-Xms512m -Xmx1024m \
+    -XX:+UseG1GC \
+    -XX:+UseContainerSupport \
+    -XX:MaxRAMPercentage=75.0 \
+    -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 \
+    -Dspring.profiles.active=dev"
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=120s --retries=3 \
+    CMD curl -f http://localhost:8080/actuator/health || exit 1
+
+# Run the application with Spring Boot DevTools for hot reloading
+CMD ["mvn", "spring-boot:run", "\"-Dmaven.test.skip=true\"", "-Dspring-boot.run.jvmArguments=\"$JAVA_OPTS\""] 

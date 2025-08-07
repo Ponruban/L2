@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <!-- Include all changelog files in order -->
+    <include file="db/changelog/changes/001-initial-schema.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/changes/002-initial-data.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/changes/003-add-user-preferences.xml" relativeToChangelogFile="false"/>
+    <include file="db/changelog/changes/004-fix-project-members-duplicates.xml" relativeToChangelogFile="false"/>
+
+</databaseChangeLog> 
