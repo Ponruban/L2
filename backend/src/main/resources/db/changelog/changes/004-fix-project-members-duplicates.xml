@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="004-fix-project-members-duplicates" author="system">
+        <comment>Clean up duplicate project member entries and add unique constraint</comment>
+        
+        <!-- Remove duplicate entries, keeping only the latest one for each project-user combination -->
+        <sql>
+            DELETE FROM project_members 
+            WHERE id NOT IN (
+                SELECT MAX(id) 
+                FROM project_members 
+                GROUP BY project_id, user_id
+            );
+        </sql>
+        
+        <!-- Add unique constraint to prevent future duplicates -->
+        <addUniqueConstraint 
+            tableName="project_members" 
+            columnNames="project_id, user_id" 
+            constraintName="uk_project_members_project_user"
+        />
+        
+    </changeSet>
+
+</databaseChangeLog> 
