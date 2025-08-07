@@ -1,0 +1,142 @@
+version: '3.8'
+
+services:
+  app:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: project-management-backend-dev
+    ports:
+      - "8080:8080"
+      - "5005:5005"  # Debug port
+    environment:
+      # Spring Profile
+      - SPRING_PROFILES_ACTIVE=dev
+      
+      # Database Configuration
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_NAME=project_management_dev
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=${DB_PASSWORD:-dev_password}
+      - DB_URL=jdbc:postgresql://postgres:5432/project_management_dev
+      
+      # JWT Configuration
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY:-dev-jwt-secret-key-for-development-only}
+      - JWT_EXPIRATION_TIME=${JWT_EXPIRATION_TIME:-86400000}
+      - JWT_REFRESH_EXPIRATION_TIME=${JWT_REFRESH_EXPIRATION_TIME:-604800000}
+      
+      # Application Configuration
+      - SERVER_PORT=8080
+      - SERVER_CONTEXT_PATH=/api/v1
+      
+      # File Upload Configuration
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE:-10485760}
+      - ALLOWED_FILE_TYPES=${ALLOWED_FILE_TYPES:-pdf,doc,docx,jpg,jpeg,png,gif}
+      - UPLOAD_DIR=uploads
+      
+      # Development Configuration
+      - SPRING_JPA_SHOW_SQL=true
+      - SPRING_JPA_PROPERTIES_HIBERNATE_FORMAT_SQL=true
+      - LOGGING_LEVEL_COM_PROJECTMANAGEMENT=DEBUG
+      - LOGGING_LEVEL_ORG_HIBERNATE_SQL=DEBUG
+      - LOGGING_LEVEL_ORG_HIBERNATE_TYPE_DESCRIPTOR_SQL_BASIC=TRACE
+      
+      # Security Configuration (relaxed for development)
+      - BCRYPT_STRENGTH=${BCRYPT_STRENGTH:-10}
+      - CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000
+      - RATE_LIMIT_REQUESTS_PER_MINUTE=${RATE_LIMIT_REQUESTS_PER_MINUTE:-1000}
+      
+      # JVM Options for development
+      - JAVA_OPTS=-Xms512m -Xmx1024m -XX:+UseG1GC -XX:+UseContainerSupport -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+      - ~/.m2:/root/.m2  # Maven cache
+      - app_uploads_dev:/app/uploads
+      - app_logs_dev:/app/logs
+      - app_temp_dev:/app/temp
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
+    networks:
+      - app-network-dev
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+        reservations:
+          memory: 512M
+          cpus: '0.25'
+
+  postgres:
+    image: postgres:17-alpine
+    container_name: project-management-postgres-dev
+    environment:
+      - POSTGRES_DB=project_management_dev
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=${DB_PASSWORD:-dev_password}
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_dev:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d project_management_dev"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - app-network-dev
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+          cpus: '0.25'
+        reservations:
+          memory: 256M
+          cpus: '0.1'
+
+  # Optional: pgAdmin for database management
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: project-management-pgadmin-dev
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL:-admin@projectmanagement.com}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD:-admin}
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data_dev:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - app-network-dev
+    restart: unless-stopped
+
+networks:
+  app-network-dev:
+    driver: bridge
+
+volumes:
+  postgres_data_dev:
+    driver: local
+  app_uploads_dev:
+    driver: local
+  app_logs_dev:
+    driver: local
+  app_temp_dev:
+    driver: local
+  pgadmin_data_dev:
+    driver: local 

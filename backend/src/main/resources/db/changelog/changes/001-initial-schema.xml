@@ -1,0 +1,360 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="001-initial-schema" author="system">
+        <comment>Create initial database schema for Project Management Dashboard</comment>
+
+        <!-- Create users table -->
+        <createTable tableName="users">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="first_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="is_active" type="BOOLEAN" defaultValueBoolean="true">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Create projects table -->
+        <createTable tableName="projects">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="status" type="VARCHAR(50)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_date" type="DATE"/>
+            <column name="end_date" type="DATE"/>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Create project_members table (junction table) -->
+        <createTable tableName="project_members">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="VARCHAR(50)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="joined_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Create milestones table -->
+        <createTable tableName="milestones">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="status" type="VARCHAR(50)" defaultValue="PENDING">
+                <constraints nullable="false"/>
+            </column>
+            <column name="due_date" type="DATE"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Create tasks table -->
+        <createTable tableName="tasks">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="project_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="milestone_id" type="BIGINT"/>
+            <column name="title" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="description" type="TEXT"/>
+            <column name="status" type="VARCHAR(50)" defaultValue="TODO">
+                <constraints nullable="false"/>
+            </column>
+            <column name="priority" type="VARCHAR(50)" defaultValue="MEDIUM">
+                <constraints nullable="false"/>
+            </column>
+            <column name="assignee_id" type="BIGINT"/>
+            <column name="deadline" type="DATE"/>
+            <column name="created_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Create comments table -->
+        <createTable tableName="comments">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="task_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Create attachments table -->
+        <createTable tableName="attachments">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="task_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uploaded_by" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_name" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_type" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_size" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="file_data" type="BLOB">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uploaded_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Create time_logs table -->
+        <createTable tableName="time_logs">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="task_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="user_id" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="hours" type="DECIMAL(5,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date" type="DATE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="CURRENT_TIMESTAMP">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <!-- Add foreign key constraints -->
+        <addForeignKeyConstraint baseTableName="projects" baseColumnNames="created_by"
+                                  constraintName="fk_projects_created_by"
+                                  referencedTableName="users" referencedColumnNames="id"
+                                  onDelete="RESTRICT" onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="project_members" baseColumnNames="project_id"
+                                  constraintName="fk_project_members_project_id"
+                                  referencedTableName="projects" referencedColumnNames="id"
+                                  onDelete="CASCADE" onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="project_members" baseColumnNames="user_id"
+                                  constraintName="fk_project_members_user_id"
+                                  referencedTableName="users" referencedColumnNames="id"
+                                  onDelete="CASCADE" onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="milestones" baseColumnNames="project_id"
+                                  constraintName="fk_milestones_project_id"
+                                  referencedTableName="projects" referencedColumnNames="id"
+                                  onDelete="CASCADE" onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="tasks" baseColumnNames="project_id"
+                                  constraintName="fk_tasks_project_id"
+                                  referencedTableName="projects" referencedColumnNames="id"
+                                  onDelete="CASCADE" onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="tasks" baseColumnNames="milestone_id"
+                                  constraintName="fk_tasks_milestone_id"
+                                  referencedTableName="milestones" referencedColumnNames="id"
+                                  onDelete="SET NULL" onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="tasks" baseColumnNames="assignee_id"
+                                  constraintName="fk_tasks_assignee_id"
+                                  referencedTableName="users" referencedColumnNames="id"
+                                  onDelete="SET NULL" onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="tasks" baseColumnNames="created_by"
+                                  constraintName="fk_tasks_created_by"
+                                  referencedTableName="users" referencedColumnNames="id"
+                                  onDelete="RESTRICT" onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="comments" baseColumnNames="task_id"
+                                  constraintName="fk_comments_task_id"
+                                  referencedTableName="tasks" referencedColumnNames="id"
+                                  onDelete="CASCADE" onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="comments" baseColumnNames="user_id"
+                                  constraintName="fk_comments_user_id"
+                                  referencedTableName="users" referencedColumnNames="id"
+                                  onDelete="CASCADE" onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="attachments" baseColumnNames="task_id"
+                                  constraintName="fk_attachments_task_id"
+                                  referencedTableName="tasks" referencedColumnNames="id"
+                                  onDelete="CASCADE" onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="attachments" baseColumnNames="uploaded_by"
+                                  constraintName="fk_attachments_uploaded_by"
+                                  referencedTableName="users" referencedColumnNames="id"
+                                  onDelete="CASCADE" onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="time_logs" baseColumnNames="task_id"
+                                  constraintName="fk_time_logs_task_id"
+                                  referencedTableName="tasks" referencedColumnNames="id"
+                                  onDelete="CASCADE" onUpdate="CASCADE"/>
+
+        <addForeignKeyConstraint baseTableName="time_logs" baseColumnNames="user_id"
+                                  constraintName="fk_time_logs_user_id"
+                                  referencedTableName="users" referencedColumnNames="id"
+                                  onDelete="CASCADE" onUpdate="CASCADE"/>
+
+        <!-- Add indexes for performance -->
+        <createIndex tableName="users" indexName="idx_users_email">
+            <column name="email"/>
+        </createIndex>
+
+        <createIndex tableName="users" indexName="idx_users_role">
+            <column name="role"/>
+        </createIndex>
+
+        <createIndex tableName="projects" indexName="idx_projects_status">
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex tableName="projects" indexName="idx_projects_created_by">
+            <column name="created_by"/>
+        </createIndex>
+
+        <createIndex tableName="project_members" indexName="idx_project_members_project_id">
+            <column name="project_id"/>
+        </createIndex>
+
+        <createIndex tableName="project_members" indexName="idx_project_members_user_id">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="milestones" indexName="idx_milestones_project_id">
+            <column name="project_id"/>
+        </createIndex>
+
+        <createIndex tableName="milestones" indexName="idx_milestones_status">
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex tableName="tasks" indexName="idx_tasks_project_id">
+            <column name="project_id"/>
+        </createIndex>
+
+        <createIndex tableName="tasks" indexName="idx_tasks_status">
+            <column name="status"/>
+        </createIndex>
+
+        <createIndex tableName="tasks" indexName="idx_tasks_assignee_id">
+            <column name="assignee_id"/>
+        </createIndex>
+
+        <createIndex tableName="tasks" indexName="idx_tasks_priority">
+            <column name="priority"/>
+        </createIndex>
+
+        <createIndex tableName="comments" indexName="idx_comments_task_id">
+            <column name="task_id"/>
+        </createIndex>
+
+        <createIndex tableName="attachments" indexName="idx_attachments_task_id">
+            <column name="task_id"/>
+        </createIndex>
+
+        <createIndex tableName="attachments" indexName="idx_attachments_uploaded_by">
+            <column name="uploaded_by"/>
+        </createIndex>
+
+        <createIndex tableName="time_logs" indexName="idx_time_logs_task_id">
+            <column name="task_id"/>
+        </createIndex>
+
+        <createIndex tableName="time_logs" indexName="idx_time_logs_user_id">
+            <column name="user_id"/>
+        </createIndex>
+
+        <createIndex tableName="time_logs" indexName="idx_time_logs_date">
+            <column name="date"/>
+        </createIndex>
+
+    </changeSet>
+
+</databaseChangeLog> 

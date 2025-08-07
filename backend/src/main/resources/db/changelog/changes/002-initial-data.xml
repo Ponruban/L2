@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="002-initial-data" author="system">
+        <comment>Seed initial data for Project Management Dashboard</comment>
+
+        <!-- Insert default roles -->
+        <insert tableName="users">
+            <column name="email">admin@projectmanagement.com</column>
+            <column name="password">$2a$12$N.zmdr9k7uOCQb376NoUnuTJ8iAt6Z5EHsM8lE9lBOsl7iKTVEFDa</column> <!-- password: admin123 -->
+            <column name="first_name">System</column>
+            <column name="last_name">Administrator</column>
+            <column name="role">PROJECT_MANAGER</column>
+            <column name="is_active">true</column>
+        </insert>
+
+        <!-- Add rollback for the insert -->
+        <rollback>
+            <delete tableName="users">
+                <where>email = 'admin@projectmanagement.com'</where>
+            </delete>
+        </rollback>
+
+    </changeSet>
+
+</databaseChangeLog> 

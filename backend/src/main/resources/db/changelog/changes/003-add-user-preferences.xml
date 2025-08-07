@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.4.xsd">
+
+    <changeSet id="003-add-user-preferences" author="system">
+        <comment>Add preferences column to users table for storing user settings</comment>
+        
+        <addColumn tableName="users">
+            <column name="preferences" type="TEXT" remarks="JSON string containing user preferences like theme and notification settings">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+        
+        <rollback>
+            <dropColumn tableName="users" columnName="preferences"/>
+        </rollback>
+    </changeSet>
+
+</databaseChangeLog> 
